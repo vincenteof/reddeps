@@ -1,0 +1,19 @@
+{
+  "useNx": false,
+  "version": "0.0.0",
+  "npmClient": "pnpm",
+  "command": {
+    "publish": {
+      "conventionalCommits": true
+    },
+    "version": {
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "gitDryRun": false,
+      "syncWorkspaceLock": true,
+      "message": "chore(release): publish new version %v"
+    }
+  },
+  "ignoreChanges": ["**/__fixtures__/**", "**/__tests__/**", "**/*.md"],
+  "packages": ["packages/*"]
+}

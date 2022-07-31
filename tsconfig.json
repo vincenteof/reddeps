@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@reddeps/deptree": [
+        "./packages/deptree/src/index.ts"
+      ],
+      "@reddeps/cli": [
+        "./packages/cli/src/index.ts"
+      ]
+    }
+  },
+  "exclude": [
+    "**/lib/**",
+    "**/es/**"
+  ]
+}
