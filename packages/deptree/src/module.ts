@@ -1,3 +1,4 @@
+import { dirname } from 'path'
 import { parse as _parse, traverse } from '@babel/core'
 import _resolve, { Resolve } from './resolve'
 import { babelParse, fileNameFromPath, readFile } from './utils'
@@ -21,11 +22,11 @@ function findDependencies(
     },
   })
   return Promise.all(
-    Array.from(modules).map((module) =>
-      resolve(filePath, module).then((subModule) =>
-        createModule(subModule, resolve)
-      )
-    )
+    Array.from(modules).map(async (module) => {
+      const fileDir = dirname(filePath)
+      const subModule = await resolve(fileDir, module)
+      return createModule(subModule, resolve)
+    })
   )
 }
 
