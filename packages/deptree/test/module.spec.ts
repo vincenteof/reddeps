@@ -27,7 +27,6 @@ describe('module', () => {
         './fixtures/module/jsxWithDecorator/input.tsx'
       )
       const module = await createModule(filePath)
-      console.log('module: ', module)
       checkModule(module, filePath, 4)
       const sub1Path = resolve(
         __dirname,
@@ -39,6 +38,25 @@ describe('module', () => {
       )
       checkModule(module.dependencies[2], sub1Path, 1)
       checkModule(module.dependencies[3], sub2Path, 3)
+    })
+
+    it('should comply with ignorePatterns', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/jsxWithDecorator/input.tsx'
+      )
+      const module = await createModule(filePath, [/node_modules/])
+      checkModule(module, filePath, 2)
+      const sub1Path = resolve(
+        __dirname,
+        './fixtures/module/jsxWithDecorator/Sub1.tsx'
+      )
+      const sub2Path = resolve(
+        __dirname,
+        './fixtures/module/jsxWithDecorator/Sub2/index.tsx'
+      )
+      checkModule(module.dependencies[0], sub1Path, 0)
+      checkModule(module.dependencies[1], sub2Path, 2)
     })
   })
 })

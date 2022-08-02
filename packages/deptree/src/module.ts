@@ -14,8 +14,9 @@ function findDependencies(
   filePath: string,
   ast: Module['ast'],
   resolve: Resolve
-): Promise<Module[]> {
+): Promise<string[]> {
   const modules: Set<string> = new Set()
+  // todo: add check for `require`
   traverse(ast, {
     ImportDeclaration: ({ node }) => {
       modules.add(node.source.value)
@@ -24,14 +25,14 @@ function findDependencies(
   return Promise.all(
     Array.from(modules).map(async (module) => {
       const fileDir = dirname(filePath)
-      const subModule = await resolve(fileDir, module)
-      return createModule(subModule, resolve)
+      return resolve(fileDir, module)
     })
   )
 }
 
 async function createModule(
   filePath: string,
+  ignorePatterns: RegExp[] = [],
   resolve: Resolve = _resolve
 ): Promise<Module> {
   const content = await readFile(filePath, 'utf-8')
@@ -46,7 +47,14 @@ async function createModule(
     },
   })
 
-  const dependencies = await findDependencies(filePath, ast, resolve)
+  const depFilePaths = await findDependencies(filePath, ast, resolve)
+  const filtered = depFilePaths.filter((path) =>
+    ignorePatterns.every((pat) => !pat.test(path))
+  )
+
+  const dependencies = await Promise.all(
+    filtered.map((path) => createModule(path, ignorePatterns, resolve))
+  )
 
   return {
     filePath,
