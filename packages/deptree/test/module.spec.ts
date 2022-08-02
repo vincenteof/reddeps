@@ -58,5 +58,24 @@ describe('module', () => {
       checkModule(module.dependencies[0], sub1Path, 0)
       checkModule(module.dependencies[1], sub2Path, 2)
     })
+
+    it('should deal with mixing import and require', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/mixingImportAndRequire/input.ts'
+      )
+      const module = await createModule(filePath)
+      checkModule(module, filePath, 2)
+      const sub1Path = resolve(
+        __dirname,
+        './fixtures/module/mixingImportAndRequire/sub1.ts'
+      )
+      const sub2Path = resolve(
+        __dirname,
+        './fixtures/module/mixingImportAndRequire/sub2.ts'
+      )
+      checkModule(module.dependencies[0], sub1Path, 0)
+      checkModule(module.dependencies[1], sub2Path, 0)
+    })
   })
 })

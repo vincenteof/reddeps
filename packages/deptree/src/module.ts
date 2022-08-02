@@ -16,10 +16,27 @@ function findDependencies(
   resolve: Resolve
 ): Promise<string[]> {
   const modules: Set<string> = new Set()
-  // todo: add check for `require`
+  // currently just checking import source
+  // todo: collect module export usage
+  // https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/import
   traverse(ast, {
     ImportDeclaration: ({ node }) => {
       modules.add(node.source.value)
+    },
+    CallExpression: ({ node }) => {
+      const nodeCallee = node?.callee
+      const arg = node?.arguments?.[0]
+      const isRequire =
+        nodeCallee?.type === 'Identifier' && nodeCallee?.name === 'require'
+      const isDynamicImport = nodeCallee?.type === 'Import'
+      const isRequireOrDynamicImport = isRequire || isDynamicImport
+      if (
+        isRequireOrDynamicImport &&
+        arg?.type === 'StringLiteral' &&
+        arg?.value
+      ) {
+        modules.add(arg?.value)
+      }
     },
   })
   return Promise.all(
