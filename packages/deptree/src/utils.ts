@@ -5,7 +5,10 @@ import { basename, extname } from 'path'
 
 export const readFile = promisify(_readFile)
 
-export const fileNameFromPath = (filePath: string) => {
+export const fileNameFromPath = (filePath: string, withExt = false) => {
+  if (withExt) {
+    return basename(filePath)
+  }
   return basename(filePath, extname(filePath))
 }
 

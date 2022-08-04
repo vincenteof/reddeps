@@ -1,6 +1,6 @@
 import { resolve } from 'path'
-import createModule, { Module } from '../src/module'
 import { describe, expect, it } from 'vitest'
+import createModule, { Module } from '../src/module'
 
 const checkModule = (moduleObj: Module, filePath: string, depLen: number) => {
   expect(moduleObj).not.toBeNull()

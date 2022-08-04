@@ -81,4 +81,20 @@ async function createModule(
   }
 }
 
+export function flatten(module: Module) {
+  const ret: Module[] = []
+  const queue: Module[] = [module]
+  let cur: Module | undefined = undefined
+  while (queue.length) {
+    cur = queue.shift()
+    if (cur) {
+      ret.push(cur)
+      if (cur.dependencies) {
+        queue.push(...cur.dependencies)
+      }
+    }
+  }
+  return ret
+}
+
 export default createModule
