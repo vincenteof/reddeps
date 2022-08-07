@@ -2,7 +2,9 @@
   "name": "@reddeps/deptree",
   "version": "0.2.0",
   "description": "",
-  "main": "index.js",
+  "main": "./lib/index.mjs",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "build": "rimraf lib && rollup -c",
     "test": "vitest",
