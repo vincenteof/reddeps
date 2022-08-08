@@ -1,7 +1,13 @@
 {
   "name": "@reddeps/deptree",
   "version": "0.3.0",
-  "description": "",
+  "description": "constructing deptree for an project",
+  "author": "vincenteof <vincenteofchen@gamil.com>",
+  "license": "MIT",
+  "keywords": [
+    "reddeps",
+    "dependencies"
+  ],
   "main": "./lib/index.mjs",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
@@ -10,9 +16,6 @@
     "test": "vitest",
     "test:run": "vitest run"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.18.10",
     "enhanced-resolve": "^5.10.0",
