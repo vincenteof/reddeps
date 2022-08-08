@@ -23,7 +23,7 @@ cli.parse()
 async function runAnalyze(entry: string, options: Record<string, string>) {
   const entryPath = resolve(process.cwd(), entry)
   const dir = options.searchDir
-  const dirPath = dir ?? resolve(process.cwd(), dir)
+  const dirPath = dir ? resolve(process.cwd(), dir) : undefined
   console.log('constructing deptree...')
   const tree = await deptree(entryPath)
   console.log('finished!')
@@ -36,7 +36,7 @@ async function runAnalyze(entry: string, options: Record<string, string>) {
 async function runRemove(entry: string, options: Record<string, string>) {
   const entryPath = resolve(process.cwd(), entry)
   const dir = options.searchDir
-  const dirPath = dir ?? resolve(process.cwd(), dir)
+  const dirPath = dir ? resolve(process.cwd(), dir) : undefined
   console.log('constructing deptree...')
   const tree = await deptree(entryPath)
   console.log('finished!')
