@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/vincenteof/reddeps/compare/v0.3.3...v0.4.0) (2022-08-08)
+
+### Features
+
+* ignore unresolvable ([e46e4a9](https://github.com/vincenteof/reddeps/commit/e46e4a9a7aea27ca44e81b4f5f97c7e864a9ef55))
+
 ## [0.3.1](https://github.com/vincenteof/reddeps/compare/v0.3.0...v0.3.1) (2022-08-08)
 
 **Note:** Version bump only for package @reddeps/deptree
