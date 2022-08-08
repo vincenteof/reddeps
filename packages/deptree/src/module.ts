@@ -10,7 +10,7 @@ export interface Module {
   dependencies: Module[]
 }
 
-function findDependencies(
+async function findDependencies(
   filePath: string,
   ast: Module['ast'],
   resolve: Resolve
@@ -39,12 +39,21 @@ function findDependencies(
       }
     },
   })
-  return Promise.all(
+  const resolutions = await Promise.allSettled(
     Array.from(modules).map(async (module) => {
       const fileDir = dirname(filePath)
       return resolve(fileDir, module)
     })
   )
+  const result: string[] = []
+  resolutions.forEach((resolution) => {
+    if (resolution.status === 'fulfilled') {
+      result.push(resolution.value)
+    } else {
+      console.error(resolution.reason)
+    }
+  })
+  return result
 }
 
 async function createModule(

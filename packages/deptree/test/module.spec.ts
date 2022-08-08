@@ -77,5 +77,19 @@ describe('module', () => {
       checkModule(module.dependencies[0], sub1Path, 0)
       checkModule(module.dependencies[1], sub2Path, 0)
     })
+
+    it('should ignore unresolvable', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/ignoreUnresolvable/input.ts'
+      )
+      const module = await createModule(filePath)
+      checkModule(module, filePath, 1)
+      const subPath = resolve(
+        __dirname,
+        './fixtures/module/ignoreUnresolvable/sub.ts'
+      )
+      checkModule(module.dependencies[0], subPath, 0)
+    })
   })
 })

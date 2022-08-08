@@ -75,27 +75,27 @@ describe('file', () => {
   })
 
   describe('findUnused', () => {
-    // it('should find all unused files for basic case', async () => {
-    //   const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
-    //   const module = await createModule(filePath)
-    //   const unusedFiles = await findUnused(
-    //     module,
-    //     resolve(__dirname, './fixtures/file/basic')
-    //   )
-    //   expect(unusedFiles?.length).toBe(1)
-    //   expect(unusedFiles[0]).toBe(
-    //     resolve(__dirname, './fixtures/file/basic/unused.ts')
-    //   )
-    // })
-    // it('should find all unused files without search dir', async () => {
-    //   const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
-    //   const module = await createModule(filePath)
-    //   const unusedFiles = await findUnused(module)
-    //   expect(unusedFiles?.length).toBe(1)
-    //   expect(unusedFiles[0]).toBe(
-    //     resolve(__dirname, './fixtures/file/basic/unused.ts')
-    //   )
-    // })
+    it('should find all unused files for basic case', async () => {
+      const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
+      const module = await createModule(filePath)
+      const unusedFiles = await findUnused(
+        module,
+        resolve(__dirname, './fixtures/file/basic')
+      )
+      expect(unusedFiles?.length).toBe(1)
+      expect(unusedFiles[0]).toBe(
+        resolve(__dirname, './fixtures/file/basic/unused.ts')
+      )
+    })
+    it('should find all unused files without search dir', async () => {
+      const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
+      const module = await createModule(filePath)
+      const unusedFiles = await findUnused(module)
+      expect(unusedFiles?.length).toBe(1)
+      expect(unusedFiles[0]).toBe(
+        resolve(__dirname, './fixtures/file/basic/unused.ts')
+      )
+    })
     it('should find nested unused files ', async () => {
       const filePath = resolve(__dirname, './fixtures/file/nested/input.ts')
       const module = await createModule(filePath)
