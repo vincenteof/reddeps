@@ -20,7 +20,8 @@
   "scripts": {
     "build": "rimraf lib && rollup -c",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "prepublishOnly": "nr build"
   },
   "devDependencies": {
     "@reddeps/deptree": "workspace:*"
