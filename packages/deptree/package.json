@@ -11,6 +11,11 @@
   "main": "./lib/index.mjs",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
+  "files": [
+    "lib",
+    "*.d.ts",
+    "*.mjs"
+  ],
   "scripts": {
     "build": "rimraf lib && rollup -c",
     "test": "vitest",

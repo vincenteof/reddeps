@@ -8,10 +8,15 @@
     "reddeps",
     "cli"
   ],
-  "main": "index.js",
+  "main": "./lib/cli.mjs",
   "bin": {
     "reddeps": "./reddeps.mjs"
   },
+  "files": [
+    "lib",
+    "*.d.ts",
+    "*.mjs"
+  ],
   "scripts": {
     "build": "rimraf lib && rollup -c",
     "test": "vitest",
