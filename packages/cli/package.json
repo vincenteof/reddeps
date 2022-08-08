@@ -3,13 +3,22 @@
   "version": "0.2.0",
   "description": "",
   "main": "index.js",
+  "bin": "./lib/cli.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf lib && rollup -c",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "devDependencies": {
     "@reddeps/deptree": "workspace:*"
   },
+  "peerDependencies": {
+    "@reddeps/deptree": "^0.2.0"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "cac": "^6.7.12"
+  }
 }

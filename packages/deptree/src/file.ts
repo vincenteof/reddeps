@@ -1,5 +1,4 @@
-import { join } from 'path'
-import { readdir as _readdir } from 'fs'
+import { Dirent, readdir as _readdir } from 'fs'
 import { promisify } from 'util'
 import { flow, map, groupBy, mapValues, zipAll } from 'lodash/fp'
 import { flatten, Module } from './module'
@@ -73,6 +72,8 @@ function commonPrefixCount(modules: Module[]) {
 }
 
 // 将一组路径合并为文件结构
+// 对 ModuleTuple 做更好的抽象，现在太裸用 index 了
+// 去除掉每次递归 prefix 的设计，太复杂
 type ModuleTuple = [Module, string[]]
 function moduleToFileRecur(modules: ModuleTuple[]): ModuleFile<Module>[] {
   const groupedNewTuples = flow(
@@ -88,7 +89,11 @@ function moduleToFileRecur(modules: ModuleTuple[]): ModuleFile<Module>[] {
   )(modules)
 
   return Object.values(groupedNewTuples).map((grouped) => {
-    if (grouped.newTuples.length === 1) {
+    // 某个前缀只有一个子项并且该子项是一个文件
+    if (
+      grouped.newTuples.length === 1 &&
+      grouped.newTuples[0][1].length === 0
+    ) {
       const module = grouped.newTuples[0][0]
       return { module, fileName: fileNameFromPath(module.filePath, true) }
     }
@@ -99,74 +104,84 @@ function moduleToFileRecur(modules: ModuleTuple[]): ModuleFile<Module>[] {
   })
 }
 
+// 1. 先考虑最简单的情况，即 deptree 的目录结构是比较正规的，即 entry 所在目录是整个依赖目录树的最高的节点
+// 2. 这种情况最简单，如果没提供 searchDir，那么默认 searchDir 就是 entry 所在目录
+// 3. 如果提供了 searchDir，那么会在一个小范围里搜索未用到的文件
+// 4. 是否需要处理不正规的 deptree？如何处理？可以依赖于 searchDir，它应该为 entry 与外围的公共祖先
 // 找出特定目录下依赖图之外的文件
-export function findUnused(
-  searchDir: string,
-  depTree: Module
-): Promise<string[]> {
+// todo: add ignore patterns
+export function findUnused(depTree: Module, searchDir?: string) {
   const [depFiles, commonPrefix] = deptree2Files(depTree)
-  const firstDepDir = findFirstDepDir(searchDir, depFiles, commonPrefix)
-
-  // todo: 支持 searchDir 更小的范围
-  if (firstDepDir === undefined) {
-    throw new Error('you should change your import files folder structure')
+  if (!searchDir) {
+    if (depFiles.length !== 1) {
+      throw new Error('this deptree is bad')
+    }
+    // 正规的目录
+    if (isSingle(depFiles[0])) {
+      console.log('no extra deps')
+      return []
+    }
+    searchDir = `${commonPrefix}/${depFiles[0].prefix}`
+  }
+  const [dir, prefix] = findSearchDir(depFiles, commonPrefix, searchDir) || []
+  if (!dir || !prefix) {
+    throw new Error('`searchDir` is unresolvable')
   }
 
-  const children = firstDepDir.children
-  return findUnusedRecur(searchDir, children)
+  return findUnusedRecur(dir, prefix)
 }
 
-async function findUnusedRecur(
-  searchDir: string,
-  files: ModuleFile<Module>[]
-): Promise<string[]> {
-  if (!files?.length) {
-    return []
-  }
-  const ret: string[] = []
-  const dirs = await readdir(searchDir, { withFileTypes: true })
-  for (const dir of dirs) {
-    const matchedFile = files.find((file) => {
-      if (isSingle(file)) {
-        return file.fileName === dir.name
-      }
-      return file.prefix === dir.name
-    })
-
-    if (matchedFile) {
-      if (dir.isDirectory() && !isSingle(matchedFile)) {
-        const nextSearchDir = join(searchDir, dir.name)
-        const subRets = await findUnusedRecur(
-          nextSearchDir,
-          matchedFile.children
-        )
-        ret.push(...subRets)
+// commonPrefix 为目标 dir 的上一层
+async function findUnusedRecur(dir: Dir<Module>, commonPrefix: string) {
+  const result: string[] = []
+  const dirPath = `${commonPrefix}/${dir.prefix}`
+  const files = dir.children
+  const dirObjects = await readdir(dirPath, { withFileTypes: true })
+  for (const dirObj of dirObjects) {
+    const targetFile = files.find((file) => sameFilePredicate(dirObj, file))
+    if (targetFile) {
+      if (!isSingle(targetFile)) {
+        const subRet = await findUnusedRecur(targetFile, dirPath)
+        result.push(...subRet)
       }
     } else {
-      ret.push(join(searchDir, dir.name))
+      result.push(`${dirPath}/${dirObj.name}`)
     }
   }
-
-  return ret
+  return result
 }
 
-function findFirstDepDir(
-  searchDir: string,
-  moduleFiles: ModuleFile<Module>[],
-  prefixToJoin = '/'
-): Dir<Module> | undefined {
-  for (let i = 0; i < moduleFiles.length; i++) {
-    const file = moduleFiles[i]
-    if (!isSingle(file)) {
-      const { prefix, children } = file
-      const curDir = join(prefixToJoin, prefix)
-      if (curDir === searchDir) {
-        return file
-      }
-      if (searchDir.includes(curDir) && children.length) {
-        return findFirstDepDir(searchDir, children, curDir)
-      }
-    }
+function sameFilePredicate(dirObj: Dirent, file: ModuleFile<Module>) {
+  const bothFile = dirObj.isFile() && isSingle(file)
+  const bothDir = dirObj.isDirectory() && !isSingle(file)
+  const sameType = bothFile || bothDir
+  const name = isSingle(file) ? file.fileName : file.prefix
+  const sameName = dirObj.name === name
+
+  if (!sameType || !sameName) {
+    return false
   }
-  return undefined
+
+  return true
+}
+
+function findSearchDir(
+  depFiles: ModuleFile<Module>[],
+  commonPrefix: string,
+  searchDir: string
+): [Dir<Module>, string] | undefined {
+  const dirs = depFiles.filter((f) => !isSingle(f)) as unknown as Dir<Module>[]
+  const target = dirs.find((d) => `${commonPrefix}/${d.prefix}` === searchDir)
+  if (target) {
+    return [target, commonPrefix]
+  }
+  let subSearchRet: [Dir<Module>, string] | undefined
+  for (const dir of dirs) {
+    subSearchRet = findSearchDir(
+      dir.children,
+      `${commonPrefix}/${dir.prefix}`,
+      searchDir
+    )
+  }
+  return subSearchRet
 }

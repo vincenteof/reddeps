@@ -55,6 +55,9 @@ importers:
   packages/cli:
     specifiers:
       '@reddeps/deptree': workspace:*
+      cac: ^6.7.12
+    dependencies:
+      cac: 6.7.12
     devDependencies:
       '@reddeps/deptree': link:../deptree
 
@@ -1489,6 +1492,11 @@ packages:
     resolution: {integrity: sha512-crQdqyCwhokxwV1UyDzLZanhkugAgft7vt0qbbdt60C6Zf3CAiGmtUCylbtYwrU6loOUw3euGrNtW1J651ot1A==}
     engines: {node: '>=10'}
     dev: true
+
+  /cac/6.7.12:
+    resolution: {integrity: sha512-rM7E2ygtMkJqD9c7WnFU6fruFcN3xe4FM5yUmgxhZzIKJk4uHl9U/fhwdajGFQbQuv43FAUo1Fe8gX/oIKDeSA==}
+    engines: {node: '>=8'}
+    dev: false
 
   /cacache/16.1.1:
     resolution: {integrity: sha512-VDKN+LHyCQXaaYZ7rA/qtkURU+/yYhviUdvqEv2LT6QPZU8jpyzEkEVAcKlKLt5dJ5BRp11ym8lo3NKLluEPLg==}
