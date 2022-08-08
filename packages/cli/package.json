@@ -9,7 +9,9 @@
     "cli"
   ],
   "main": "index.js",
-  "bin": "./lib/cli.mjs",
+  "bin": {
+    "reddeps": "./reddeps.mjs"
+  },
   "scripts": {
     "build": "rimraf lib && rollup -c",
     "test": "vitest",
