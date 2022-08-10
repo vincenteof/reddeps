@@ -1,7 +1,7 @@
 import { dirname } from 'path'
 import { parse as _parse, traverse } from '@babel/core'
 import _resolve, { Resolve } from './resolve'
-import { babelParse, fileNameFromPath, readFile } from './utils'
+import { babelParse, fileNameFromPath, matchSomeRegex, readFile } from './utils'
 
 export interface Module {
   filePath: string
@@ -91,8 +91,8 @@ function createModule(
     generated.set(curFilePath, curModule)
 
     const depFilePaths = await findDependencies(curFilePath, ast, resolve)
-    const filtered = depFilePaths.filter((path) =>
-      ignorePatterns.every((pat) => !pat.test(path))
+    const filtered = depFilePaths.filter(
+      (path) => !matchSomeRegex(path, ignorePatterns)
     )
 
     const dependencies = await Promise.all(

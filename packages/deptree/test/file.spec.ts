@@ -78,10 +78,28 @@ describe('file', () => {
     it('should find all unused files for basic case', async () => {
       const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
       const module = await createModule(filePath)
-      const unusedFiles = await findUnused(
-        module,
-        resolve(__dirname, './fixtures/file/basic')
-      )
+      const unusedFiles = await findUnused(module, {
+        searchDir: resolve(__dirname, './fixtures/file/basic'),
+      })
+      expect(unusedFiles?.length).toBe(2)
+      expect(
+        unusedFiles.findIndex(
+          (f) => f === resolve(__dirname, './fixtures/file/basic/unused.ts')
+        )
+      ).not.toBe(-1)
+      expect(
+        unusedFiles.findIndex(
+          (f) => f === resolve(__dirname, './fixtures/file/basic/test.json')
+        )
+      ).not.toBe(-1)
+    })
+    it('should obey ignore patterns', async () => {
+      const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
+      const module = await createModule(filePath)
+      const unusedFiles = await findUnused(module, {
+        searchDir: resolve(__dirname, './fixtures/file/basic'),
+        ignorePatterns: [/test\.json/],
+      })
       expect(unusedFiles?.length).toBe(1)
       expect(unusedFiles[0]).toBe(
         resolve(__dirname, './fixtures/file/basic/unused.ts')
@@ -91,18 +109,24 @@ describe('file', () => {
       const filePath = resolve(__dirname, './fixtures/file/basic/input.ts')
       const module = await createModule(filePath)
       const unusedFiles = await findUnused(module)
-      expect(unusedFiles?.length).toBe(1)
-      expect(unusedFiles[0]).toBe(
-        resolve(__dirname, './fixtures/file/basic/unused.ts')
-      )
+      expect(unusedFiles?.length).toBe(2)
+      expect(
+        unusedFiles.findIndex(
+          (f) => f === resolve(__dirname, './fixtures/file/basic/unused.ts')
+        )
+      ).not.toBe(-1)
+      expect(
+        unusedFiles.findIndex(
+          (f) => f === resolve(__dirname, './fixtures/file/basic/test.json')
+        )
+      ).not.toBe(-1)
     })
     it('should find nested unused files ', async () => {
       const filePath = resolve(__dirname, './fixtures/file/nested/input.ts')
       const module = await createModule(filePath)
-      const unusedFiles = await findUnused(
-        module,
-        resolve(__dirname, './fixtures/file/nested')
-      )
+      const unusedFiles = await findUnused(module, {
+        searchDir: resolve(__dirname, './fixtures/file/nested'),
+      })
       expect(unusedFiles?.length).toBe(2)
       expect(
         unusedFiles.findIndex(

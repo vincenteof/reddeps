@@ -39,8 +39,7 @@ describe('module', () => {
       checkModule(module.dependencies[2], sub1Path, 1)
       checkModule(module.dependencies[3], sub2Path, 3)
     })
-
-    it('should comply with ignorePatterns', async () => {
+    it('should comply with ignorePatterns for node_modules', async () => {
       const filePath = resolve(
         __dirname,
         './fixtures/module/jsxWithDecorator/input.tsx'
@@ -58,7 +57,19 @@ describe('module', () => {
       checkModule(module.dependencies[0], sub1Path, 0)
       checkModule(module.dependencies[1], sub2Path, 2)
     })
-
+    it('should comply with ignorePatterns for local modules', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/jsxWithDecorator/input.tsx'
+      )
+      const module = await createModule(filePath, [/node_modules/, /Sub2/])
+      checkModule(module, filePath, 1)
+      const sub1Path = resolve(
+        __dirname,
+        './fixtures/module/jsxWithDecorator/Sub1.tsx'
+      )
+      checkModule(module.dependencies[0], sub1Path, 0)
+    })
     it('should deal with mixing import and require', async () => {
       const filePath = resolve(
         __dirname,
@@ -77,7 +88,6 @@ describe('module', () => {
       checkModule(module.dependencies[0], sub1Path, 0)
       checkModule(module.dependencies[1], sub2Path, 0)
     })
-
     it('should ignore unresolvable', async () => {
       const filePath = resolve(
         __dirname,
@@ -91,7 +101,6 @@ describe('module', () => {
       )
       checkModule(module.dependencies[0], subPath, 0)
     })
-
     it('should terminate with module importing itself', async () => {
       const filePath = resolve(
         __dirname,
@@ -102,7 +111,6 @@ describe('module', () => {
       checkModule(module.dependencies[0], filePath, 1)
       expect(module).toBe(module.dependencies[0])
     })
-
     it('should terminate with circular deps', async () => {
       const filePath = resolve(
         __dirname,

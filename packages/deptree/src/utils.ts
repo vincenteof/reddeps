@@ -15,3 +15,6 @@ export const fileNameFromPath = (filePath: string, withExt = false) => {
 export const babelParse = promisify<string, TransformOptions, ParseResult>(
   _parse
 )
+
+export const matchSomeRegex = (str: string, regExps: RegExp[]) =>
+  regExps.some((reg) => reg.test(str))

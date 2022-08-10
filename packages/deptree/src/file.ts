@@ -2,7 +2,7 @@ import { Dirent, readdir as _readdir } from 'fs'
 import { promisify } from 'util'
 import { flow, map, groupBy, mapValues, zipAll } from 'lodash/fp'
 import { flatten, Module } from './module'
-import { fileNameFromPath } from './utils'
+import { fileNameFromPath, matchSomeRegex } from './utils'
 
 const readdir = promisify(_readdir)
 
@@ -110,7 +110,15 @@ function moduleToFileRecur(modules: ModuleTuple[]): ModuleFile<Module>[] {
 // 4. 是否需要处理不正规的 deptree？如何处理？可以依赖于 searchDir，它应该为 entry 与外围的公共祖先
 // 找出特定目录下依赖图之外的文件
 // todo: add ignore patterns
-export function findUnused(depTree: Module, searchDir?: string) {
+
+type Config = {
+  searchDir?: string
+  ignorePatterns?: RegExp[]
+}
+
+export function findUnused(depTree: Module, config: Config = {}) {
+  let { searchDir } = config
+  const { ignorePatterns = [] } = config
   const [depFiles, commonPrefix] = deptree2Files(depTree)
   if (!searchDir) {
     if (depFiles.length !== 1) {
@@ -118,7 +126,6 @@ export function findUnused(depTree: Module, searchDir?: string) {
     }
     // 正规的目录
     if (isSingle(depFiles[0])) {
-      console.log('no extra deps')
       return []
     }
     searchDir = `${commonPrefix}/${depFiles[0].prefix}`
@@ -128,24 +135,33 @@ export function findUnused(depTree: Module, searchDir?: string) {
     throw new Error('`searchDir` is unresolvable')
   }
 
-  return findUnusedRecur(dir, prefix)
+  return findUnusedRecur(dir, prefix, ignorePatterns)
 }
 
 // commonPrefix 为目标 dir 的上一层
-async function findUnusedRecur(dir: Dir<Module>, commonPrefix: string) {
+async function findUnusedRecur(
+  dir: Dir<Module>,
+  commonPrefix: string,
+  ignorePatterns: RegExp[]
+) {
   const result: string[] = []
   const dirPath = `${commonPrefix}/${dir.prefix}`
   const files = dir.children
   const dirObjects = await readdir(dirPath, { withFileTypes: true })
   for (const dirObj of dirObjects) {
     const targetFile = files.find((file) => sameFilePredicate(dirObj, file))
+    const filePath = `${dirPath}/${dirObj.name}`
     if (targetFile) {
       if (!isSingle(targetFile)) {
-        const subRet = await findUnusedRecur(targetFile, dirPath)
+        const subRet = await findUnusedRecur(
+          targetFile,
+          dirPath,
+          ignorePatterns
+        )
         result.push(...subRet)
       }
-    } else {
-      result.push(`${dirPath}/${dirObj.name}`)
+    } else if (!matchSomeRegex(filePath, ignorePatterns)) {
+      result.push(filePath)
     }
   }
   return result
