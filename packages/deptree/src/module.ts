@@ -56,38 +56,55 @@ async function findDependencies(
   return result
 }
 
-async function createModule(
+function createModule(
   filePath: string,
   ignorePatterns: RegExp[] = [],
   resolve: Resolve = _resolve
-): Promise<Module> {
-  const content = await readFile(filePath, 'utf-8')
-  const filename = fileNameFromPath(filePath)
-  // todo: 抽象一下这里的配置，做成可变
-  const ast = await babelParse(content, {
-    filename,
-    babelrc: false,
-    configFile: false,
-    parserOpts: {
-      plugins: ['typescript', 'jsx', 'decorators-legacy'],
-    },
-  })
+) {
+  // avoid infinite loop for circular deps
+  const generated = new Map<string, Module>()
 
-  const depFilePaths = await findDependencies(filePath, ast, resolve)
-  const filtered = depFilePaths.filter((path) =>
-    ignorePatterns.every((pat) => !pat.test(path))
-  )
+  async function createModuleRecur(curFilePath: string): Promise<Module> {
+    const partialModule = generated.get(curFilePath)
+    if (partialModule) {
+      return partialModule
+    }
+    const content = await readFile(curFilePath, 'utf-8')
+    const filename = fileNameFromPath(curFilePath)
+    // todo: 抽象一下这里的配置，做成可变
+    const ast = await babelParse(content, {
+      filename,
+      babelrc: false,
+      configFile: false,
+      parserOpts: {
+        plugins: ['typescript', 'jsx', 'decorators-legacy'],
+      },
+    })
 
-  const dependencies = await Promise.all(
-    filtered.map((path) => createModule(path, ignorePatterns, resolve))
-  )
+    const curModule: Module = {
+      filePath: curFilePath,
+      content,
+      ast,
+      dependencies: [],
+    }
 
-  return {
-    filePath,
-    content,
-    ast,
-    dependencies,
+    generated.set(curFilePath, curModule)
+
+    const depFilePaths = await findDependencies(curFilePath, ast, resolve)
+    const filtered = depFilePaths.filter((path) =>
+      ignorePatterns.every((pat) => !pat.test(path))
+    )
+
+    const dependencies = await Promise.all(
+      filtered.map((path) => createModuleRecur(path))
+    )
+
+    curModule.dependencies = dependencies
+
+    return curModule
   }
+
+  return createModuleRecur(filePath)
 }
 
 export function flatten(module: Module) {

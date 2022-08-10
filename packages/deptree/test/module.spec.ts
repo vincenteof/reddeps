@@ -91,5 +91,50 @@ describe('module', () => {
       )
       checkModule(module.dependencies[0], subPath, 0)
     })
+
+    it('should terminate with module importing itself', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/circularInput.ts'
+      )
+      const module = await createModule(filePath)
+      checkModule(module, filePath, 1)
+      checkModule(module.dependencies[0], filePath, 1)
+      expect(module).toBe(module.dependencies[0])
+    })
+
+    it('should terminate with circular deps', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/input.ts'
+      )
+      const dep1Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub1.ts'
+      )
+      const dep2Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub2.ts'
+      )
+      const dep21Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub21.ts'
+      )
+      const dep211Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub211.ts'
+      )
+      const module = await createModule(filePath)
+      checkModule(module, filePath, 2)
+      checkModule(module.dependencies[0], dep1Path, 0)
+      const circleRoot = module.dependencies[1]
+      checkModule(circleRoot, dep2Path, 1)
+      const circleDep1 = circleRoot.dependencies[0]
+      checkModule(circleDep1, dep21Path, 1)
+      const circleDep11 = circleDep1.dependencies[0]
+      checkModule(circleDep11, dep211Path, 1)
+      const last = circleDep11.dependencies[0]
+      expect(circleRoot).toBe(last)
+    })
   })
 })
