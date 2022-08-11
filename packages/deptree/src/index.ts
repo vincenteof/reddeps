@@ -1,8 +1,4 @@
-type DepTreeParams = Record<string, unknown>
-
-function deptree(params?: DepTreeParams) {
-  console.log('params: ', params)
-  console.log('deptree')
-}
-
-export default deptree
+export * from './module'
+export * from './file'
+export * from './resolve'
+export { default as deptree } from './module'

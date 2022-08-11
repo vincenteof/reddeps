@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.1](https://github.com/vincenteof/reddeps/compare/v0.4.0...v0.4.1) (2022-08-08)
+
+**Note:** Version bump only for package @reddeps/cli
+
+# [0.4.0](https://github.com/vincenteof/reddeps/compare/v0.3.3...v0.4.0) (2022-08-08)
+
+**Note:** Version bump only for package @reddeps/cli
+
+## [0.3.3](https://github.com/vincenteof/reddeps/compare/v0.3.2...v0.3.3) (2022-08-08)
+
+### Bug Fixes
+
+* resolve search dir ([68052a6](https://github.com/vincenteof/reddeps/commit/68052a670ebf18d7d584c90f75bf1a678b41be1d))
+
+## [0.3.2](https://github.com/vincenteof/reddeps/compare/v0.3.1...v0.3.2) (2022-08-08)
+
+**Note:** Version bump only for package @reddeps/cli
+
+## [0.3.1](https://github.com/vincenteof/reddeps/compare/v0.3.0...v0.3.1) (2022-08-08)
+
+**Note:** Version bump only for package @reddeps/cli
+
+# [0.3.0](https://github.com/vincenteof/reddeps/compare/v0.2.0...v0.3.0) (2022-08-08)
+
+### Features
+
+* cli with analyze and clean ([74f1a69](https://github.com/vincenteof/reddeps/commit/74f1a69938b35022b10c9956e9ca3d51c3f14007))
+
 # [0.2.0](https://github.com/vincenteof/reddeps/compare/v0.1.0...v0.2.0) (2022-07-31)
 
 ### Features

@@ -1,15 +1,36 @@
 {
   "name": "@reddeps/cli",
-  "version": "0.2.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.4.1",
+  "description": "cli for reddeps",
+  "author": "vincenteof <vincenteofchen@gamil.com>",
+  "license": "MIT",
+  "keywords": [
+    "reddeps",
+    "cli"
+  ],
+  "main": "./lib/cli.mjs",
+  "bin": {
+    "reddeps": "./reddeps.mjs"
+  },
+  "files": [
+    "lib",
+    "*.d.ts",
+    "*.mjs"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf lib && rollup -c",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "nr build"
   },
   "devDependencies": {
     "@reddeps/deptree": "workspace:*"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "peerDependencies": {
+    "@reddeps/deptree": "^0.2.0"
+  },
+  "dependencies": {
+    "cac": "^6.7.12"
+  }
 }

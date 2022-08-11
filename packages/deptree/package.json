@@ -1,12 +1,43 @@
 {
   "name": "@reddeps/deptree",
-  "version": "0.2.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.4.1",
+  "description": "constructing deptree for an project",
+  "author": "vincenteof <vincenteofchen@gamil.com>",
+  "license": "MIT",
+  "keywords": [
+    "reddeps",
+    "dependencies"
+  ],
+  "main": "./lib/index.mjs",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib",
+    "*.d.ts",
+    "*.mjs"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf lib && rollup -c",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "nr build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "@babel/core": "^7.18.10",
+    "enhanced-resolve": "^5.10.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/babel__core": "^7.1.19",
+    "@types/babel__generator": "^7.6.4",
+    "@types/babel__template": "^7.4.1",
+    "@types/babel__traverse": "^7.18.0",
+    "@types/lodash": "^4.14.182",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "c8": "^7.12.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
 }

@@ -1,6 +1,6 @@
 {
   "useNx": false,
-  "version": "0.2.0",
+  "version": "0.4.1",
   "npmClient": "pnpm",
   "command": {
     "publish": {
@@ -14,12 +14,6 @@
       "message": "chore(release): publish new version %v"
     }
   },
-  "ignoreChanges": [
-    "**/__fixtures__/**",
-    "**/__tests__/**",
-    "**/*.md"
-  ],
-  "packages": [
-    "packages/*"
-  ]
+  "ignoreChanges": ["**/test/**", "**/fixtures/**", "**/*.md"],
+  "packages": ["packages/*"]
 }
