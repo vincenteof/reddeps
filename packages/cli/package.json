@@ -21,6 +21,7 @@
     "build": "rimraf lib && rollup -c",
     "test": "vitest",
     "test:run": "vitest run",
+    "coverage": "vitest run --coverage",
     "prepublishOnly": "nr build"
   },
   "devDependencies": {
