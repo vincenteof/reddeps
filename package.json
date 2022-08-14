@@ -7,7 +7,9 @@
   "scripts": {
     "lint": "eslint .",
     "new-version": "lerna version",
-    "new-publish": "lerna publish from-package"
+    "new-publish": "lerna publish from-package",
+    "new-version:ci": "lerna version --yes",
+    "new-publish:ci": "lerna publish from-package --yes"
   },
   "keywords": [],
   "author": "",

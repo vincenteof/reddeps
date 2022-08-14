@@ -26,9 +26,9 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "14847208+${{ github.actor }}@users.noreply.github.com"
       - run: pnpm install
-      - run: pnpm run new-version
+      - run: pnpm run new-version:ci
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: pnpm run new-publish
+      - run: pnpm run new-publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
