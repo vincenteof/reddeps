@@ -1,7 +1,10 @@
-name: Publish Package to npmjs
+name: Publish Package to NPM
 on:
-  release:
-    types: [created]
+  publish:
+    branches:
+      - main
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,8 +17,18 @@ jobs:
       - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
+      _ run: |
+        echo "node"
+        node -v
+        echo "pnpm"
+        pnpm -v
+      - run: |
+        git config --global user.name "${{ github.actor }}"
+        git config --global user.email "14847208+${{ github.actor }}@users.noreply.github.com"
       - run: pnpm install
+      - run: pnpm run new-version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: pnpm run new-publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
