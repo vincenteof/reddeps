@@ -39,5 +39,24 @@ describe('utils', () => {
       ]
       expect(paths.filter(predicate)).toStrictEqual(result)
     })
+    it('makes predicate recognizing exact files', () => {
+      const predicate = makeGlobsPredicate([
+        '**/node_modules/**',
+        'reddeps.config.json',
+      ])
+      const paths = [
+        '/a/b.js',
+        '/a/test.config.json',
+        '/a/reddeps.config.json',
+        '/a/node_modules/test/index.js',
+        '/a/node_modules/.pnpm/something/index.js',
+      ]
+      const result = [
+        '/a/reddeps.config.json',
+        '/a/node_modules/test/index.js',
+        '/a/node_modules/.pnpm/something/index.js',
+      ]
+      expect(paths.filter(predicate)).toStrictEqual(result)
+    })
   })
 })

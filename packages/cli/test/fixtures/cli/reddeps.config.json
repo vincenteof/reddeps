@@ -1,0 +1,4 @@
+{
+  "moduleIgnorePatterns": ["**/node_modules/**"],
+  "fileIgnorePatterns": ["reddeps.config.json"]
+}
