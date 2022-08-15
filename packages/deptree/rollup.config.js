@@ -11,6 +11,7 @@ const external = [
   ...builtinModules,
   ...Object.keys(pkg.dependencies || {}),
   ...Object.keys(pkg.peerDependencies || {}),
+  /lodash/,
 ]
 
 export default defineConfig([
