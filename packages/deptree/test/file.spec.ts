@@ -98,7 +98,7 @@ describe('file', () => {
       const module = await createModule(filePath)
       const unusedFiles = await findUnused(module, {
         searchDir: resolve(__dirname, './fixtures/file/basic'),
-        ignorePatterns: [/test\.json/],
+        ignorePatterns: ['test.json'],
       })
       expect(unusedFiles?.length).toBe(1)
       expect(unusedFiles[0]).toBe(

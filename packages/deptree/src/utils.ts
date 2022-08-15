@@ -17,9 +17,6 @@ export const babelParse = promisify<string, TransformOptions, ParseResult>(
   _parse
 )
 
-export const matchSomeRegex = (str: string, regExps: RegExp[]) =>
-  regExps.some((reg) => reg.test(str))
-
 // todo: 可以暴露出 minimacth 本身的配置
 export const makeGlobsPredicate = (patterns: string[]) => (path: string) =>
   patterns.some((pat) => minimatch(path, pat, { matchBase: true, dot: true }))
