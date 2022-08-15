@@ -1,6 +1,6 @@
 import cac from 'cac'
-import { resolve } from 'path'
-import { readFileSync } from 'fs'
+import { dirname, resolve } from 'path'
+import { readFileSync, existsSync } from 'fs'
 import { deptree, findUnused } from '@reddeps/deptree'
 import { cleanUnused } from './cleanUnused'
 import { version } from '../package.json'
@@ -25,28 +25,34 @@ cli.parse()
 
 async function runAnalyze(entry: string, options: Record<string, string>) {
   const entryPath = resolve(process.cwd(), entry)
-  const userOptions = getUserOptions(options)
-  const { dir } = userOptions
-  const dirPath = dir ? resolve(process.cwd(), dir) : undefined
+  const userOptions = getUserOptions(options, entryPath)
+  const { searchDir, moduleIgnorePatterns, fileIgnorePatterns } = userOptions
+  const dirPath = searchDir ? resolve(process.cwd(), searchDir) : undefined
   console.log('constructing deptree...')
-  const tree = await deptree(entryPath)
+  const tree = await deptree(entryPath, moduleIgnorePatterns)
   console.log('finished!')
   console.log('finding unused files...')
-  const unusedFiles = await findUnused(tree, { searchDir: dirPath })
+  const unusedFiles = await findUnused(tree, {
+    searchDir: dirPath,
+    ignorePatterns: fileIgnorePatterns,
+  })
   console.log('Unused files: ')
   console.log(unusedFiles)
 }
 
 async function runClean(entry: string, options: Record<string, string>) {
   const entryPath = resolve(process.cwd(), entry)
-  const userOptions = getUserOptions(options)
-  const { dir } = userOptions
-  const dirPath = dir ? resolve(process.cwd(), dir) : undefined
+  const userOptions = getUserOptions(options, entryPath)
+  const { searchDir, moduleIgnorePatterns, fileIgnorePatterns } = userOptions
+  const dirPath = searchDir ? resolve(process.cwd(), searchDir) : undefined
   console.log('constructing deptree...')
-  const tree = await deptree(entryPath)
+  const tree = await deptree(entryPath, moduleIgnorePatterns)
   console.log('finished!')
   console.log('finding unused files...')
-  const unusedFiles = await findUnused(tree, { searchDir: dirPath })
+  const unusedFiles = await findUnused(tree, {
+    searchDir: dirPath,
+    ignorePatterns: fileIgnorePatterns,
+  })
   console.log('found!')
   console.log('clean...')
   await cleanUnused(unusedFiles)
@@ -54,17 +60,26 @@ async function runClean(entry: string, options: Record<string, string>) {
 }
 
 function readConfig(config: string) {
-  if (!config) {
-    return {}
+  try {
+    if (!existsSync(config)) {
+      console.log('reddeps config file cannot be found')
+      return
+    }
+    const content = readFileSync(config, 'utf-8')
+    return JSON.parse(content)
+  } catch (err) {
+    console.log('unable to read reddeps config')
   }
-  const configPath = resolve(process.cwd(), config)
-  const content = readFileSync(configPath, 'utf-8')
-  return JSON.parse(content)
+  return {}
 }
 
-function getUserOptions(options: Record<string, string>) {
+function getUserOptions(options: Record<string, string>, entryPath: string) {
   const { config, ...inputOptions } = options
-  const configObj = readConfig(config)
+  const configPath = config
+    ? resolve(process.cwd(), config)
+    : resolve(dirname(entryPath), './reddeps.config.json')
+
+  const configObj = readConfig(configPath)
 
   return {
     ...inputOptions,

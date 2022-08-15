@@ -1,7 +1,12 @@
 import { dirname } from 'path'
 import { parse as _parse, traverse } from '@babel/core'
 import _resolve, { Resolve } from './resolve'
-import { babelParse, fileNameFromPath, matchSomeRegex, readFile } from './utils'
+import {
+  babelParse,
+  makeGlobsPredicate,
+  fileNameFromPath,
+  readFile,
+} from './utils'
 
 export interface Module {
   filePath: string
@@ -58,11 +63,12 @@ async function findDependencies(
 
 function createModule(
   filePath: string,
-  ignorePatterns: RegExp[] = [],
+  ignorePatterns: string[] = [],
   resolve: Resolve = _resolve
 ) {
   // avoid infinite loop for circular deps
   const generated = new Map<string, Module>()
+  const predicate = makeGlobsPredicate(ignorePatterns)
 
   async function createModuleRecur(curFilePath: string): Promise<Module> {
     const partialModule = generated.get(curFilePath)
@@ -91,14 +97,13 @@ function createModule(
     generated.set(curFilePath, curModule)
 
     const depFilePaths = await findDependencies(curFilePath, ast, resolve)
-    const filtered = depFilePaths.filter(
-      (path) => !matchSomeRegex(path, ignorePatterns)
-    )
+    const filteredPaths = ignorePatterns.length
+      ? depFilePaths.filter((p) => !predicate(p))
+      : depFilePaths
 
     const dependencies = await Promise.all(
-      filtered.map((path) => createModuleRecur(path))
+      filteredPaths.map((path) => createModuleRecur(path))
     )
-
     curModule.dependencies = dependencies
 
     return curModule

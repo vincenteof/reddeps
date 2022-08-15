@@ -4,7 +4,7 @@ import { spawnAsPromise } from './helper'
 
 describe('cli', () => {
   describe('analyze', () => {
-    it('should list all unused files', async () => {
+    it('should list all unused files with default config file', async () => {
       // todo: how to run (spawn) this ts file directly
       const cliFilePath = resolve(__dirname, '../lib/cli.mjs')
       const input = resolve(__dirname, './fixtures/cli/input.ts')
@@ -29,6 +29,43 @@ describe('cli', () => {
       expect(stdout).toBe(expectedStdout)
       expect(stderr).toBe('')
     })
+  })
+
+  it('should list all unused files including config file', async () => {
+    const cliFilePath = resolve(__dirname, '../lib/cli.mjs')
+    const input = resolve(__dirname, './fixtures/cli/input.ts')
+    const dir = resolve(__dirname, './fixtures/cli')
+    const args = [
+      cliFilePath,
+      'analyze',
+      input,
+      '--searchDir',
+      dir,
+      '--config',
+      'nonexsist.config.json',
+    ]
+    const { stdout, stderr } = await spawnAsPromise(process.execPath, args)
+    const unusedFile1 = resolve(__dirname, './fixtures/cli/sub2/innerUnused.ts')
+    const unusedFile2 = resolve(__dirname, './fixtures/cli/unused1.ts')
+    const unusedConfig = resolve(
+      __dirname,
+      './fixtures/cli/reddeps.config.json'
+    )
+
+    // todo 放到输出文件
+    const expectedStdout =
+      'reddeps config file cannot be found\n' +
+      'constructing deptree...\n' +
+      'finished!\n' +
+      'finding unused files...\n' +
+      'Unused files: \n' +
+      '[\n' +
+      `  '${unusedConfig}',\n` +
+      `  '${unusedFile1}',\n` +
+      `  '${unusedFile2}'\n` +
+      ']\n'
+    expect(stdout).toBe(expectedStdout)
+    expect(stderr).toBe('')
   })
 
   describe('clean', () => {

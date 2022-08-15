@@ -44,7 +44,7 @@ describe('module', () => {
         __dirname,
         './fixtures/module/jsxWithDecorator/input.tsx'
       )
-      const module = await createModule(filePath, [/node_modules/])
+      const module = await createModule(filePath, ['**/node_modules/**'])
       checkModule(module, filePath, 2)
       const sub1Path = resolve(
         __dirname,
@@ -62,7 +62,10 @@ describe('module', () => {
         __dirname,
         './fixtures/module/jsxWithDecorator/input.tsx'
       )
-      const module = await createModule(filePath, [/node_modules/, /Sub2/])
+      const module = await createModule(filePath, [
+        '**/node_modules/**',
+        '**/Sub2/**',
+      ])
       checkModule(module, filePath, 1)
       const sub1Path = resolve(
         __dirname,

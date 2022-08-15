@@ -2,7 +2,7 @@ import { Dirent, readdir as _readdir } from 'fs'
 import { promisify } from 'util'
 import { flow, map, groupBy, mapValues, zipAll } from 'lodash/fp'
 import { flatten, Module } from './module'
-import { fileNameFromPath, matchSomeRegex } from './utils'
+import { fileNameFromPath, makeGlobsPredicate } from './utils'
 
 const readdir = promisify(_readdir)
 
@@ -113,7 +113,7 @@ function moduleToFileRecur(modules: ModuleTuple[]): ModuleFile<Module>[] {
 
 type Config = {
   searchDir?: string
-  ignorePatterns?: RegExp[]
+  ignorePatterns?: string[]
 }
 
 export function findUnused(depTree: Module, config: Config = {}) {
@@ -135,36 +135,29 @@ export function findUnused(depTree: Module, config: Config = {}) {
     throw new Error('`searchDir` is unresolvable')
   }
 
-  return findUnusedRecur(dir, prefix, ignorePatterns)
-}
-
-// commonPrefix 为目标 dir 的上一层
-async function findUnusedRecur(
-  dir: Dir<Module>,
-  commonPrefix: string,
-  ignorePatterns: RegExp[]
-) {
-  const result: string[] = []
-  const dirPath = `${commonPrefix}/${dir.prefix}`
-  const files = dir.children
-  const dirObjects = await readdir(dirPath, { withFileTypes: true })
-  for (const dirObj of dirObjects) {
-    const targetFile = files.find((file) => sameFilePredicate(dirObj, file))
-    const filePath = `${dirPath}/${dirObj.name}`
-    if (targetFile) {
-      if (!isSingle(targetFile)) {
-        const subRet = await findUnusedRecur(
-          targetFile,
-          dirPath,
-          ignorePatterns
-        )
-        result.push(...subRet)
+  const needIgnore = makeGlobsPredicate(ignorePatterns)
+  // commonPrefix 为目标 dir 的上一层
+  async function findUnusedRecur(dir: Dir<Module>, commonPrefix: string) {
+    const result: string[] = []
+    const dirPath = `${commonPrefix}/${dir.prefix}`
+    const files = dir.children
+    const dirObjects = await readdir(dirPath, { withFileTypes: true })
+    for (const dirObj of dirObjects) {
+      const targetFile = files.find((file) => sameFilePredicate(dirObj, file))
+      const filePath = `${dirPath}/${dirObj.name}`
+      if (targetFile) {
+        if (!isSingle(targetFile)) {
+          const subRet = await findUnusedRecur(targetFile, dirPath)
+          result.push(...subRet)
+        }
+      } else if (!needIgnore(filePath)) {
+        result.push(filePath)
       }
-    } else if (!matchSomeRegex(filePath, ignorePatterns)) {
-      result.push(filePath)
     }
+    return result
   }
-  return result
+
+  return findUnusedRecur(dir, prefix)
 }
 
 function sameFilePredicate(dirObj: Dirent, file: ModuleFile<Module>) {
