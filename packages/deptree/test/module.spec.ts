@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import { describe, expect, it } from 'vitest'
-import createModule, { Module } from '../src/module'
+import createModule, { Module, flatten } from '../src/module'
 
 const checkModule = (moduleObj: Module, filePath: string, depLen: number) => {
   expect(moduleObj).not.toBeNull()
@@ -146,6 +146,46 @@ describe('module', () => {
       checkModule(circleDep11, dep211Path, 1)
       const last = circleDep11.dependencies[0]
       expect(circleRoot).toBe(last)
+    })
+  })
+  describe('flatten', () => {
+    it('it should flatten basic dep tree', async () => {
+      const filePath = resolve(__dirname, './fixtures/module/basic/input.ts')
+      const module = await createModule(filePath)
+      const flattened = flatten(module)
+      expect(flattened.length).toBe(3)
+    })
+    it('it should flatten circular dep tree', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/input.ts'
+      )
+      const module = await createModule(filePath)
+      const flattened = flatten(module)
+      expect(flattened.length).toBe(5)
+      const dep1Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub1.ts'
+      )
+      const dep2Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub2.ts'
+      )
+      const dep21Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub21.ts'
+      )
+      const dep211Path = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/sub211.ts'
+      )
+      expect(flattened.map((x) => x.filePath)).toStrictEqual([
+        filePath,
+        dep1Path,
+        dep2Path,
+        dep21Path,
+        dep211Path,
+      ])
     })
   })
 })
