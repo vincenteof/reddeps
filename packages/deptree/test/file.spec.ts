@@ -141,5 +141,22 @@ describe('file', () => {
         )
       ).not.toBe(-1)
     })
+    it('should find unused files in circular dep tree', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/file/circularDeps/input.ts'
+      )
+      const module = await createModule(filePath)
+      const unusedFiles = await findUnused(module, {
+        searchDir: resolve(__dirname, './fixtures/file/circularDeps'),
+      })
+      expect(unusedFiles?.length).toBe(1)
+      expect(
+        unusedFiles.findIndex(
+          (x) =>
+            x === resolve(__dirname, './fixtures/file/circularDeps/unused.ts')
+        )
+      ).not.toBe(-1)
+    })
   })
 })
