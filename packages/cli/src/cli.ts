@@ -1,7 +1,7 @@
 import cac from 'cac'
-import { dirname, resolve } from 'path'
-import { readFileSync, existsSync } from 'fs'
-import { deptree, findUnused } from '@reddeps/deptree'
+import { dirname, extname, resolve } from 'path'
+import { existsSync } from 'fs'
+import { deptree, findUnused, makeResolve, readFile } from '@reddeps/deptree'
 import { cleanUnused } from './cleanUnused'
 import { version } from '../package.json'
 
@@ -25,11 +25,13 @@ cli.parse()
 
 async function runAnalyze(entry: string, options: Record<string, string>) {
   const entryPath = resolve(process.cwd(), entry)
-  const userOptions = getUserOptions(options, entryPath)
-  const { searchDir, moduleIgnorePatterns, fileIgnorePatterns } = userOptions
-  const dirPath = searchDir ? resolve(process.cwd(), searchDir) : undefined
+  const userOptions = await getUserOptions(options, entryPath)
+  const { searchDir, moduleIgnorePatterns, fileIgnorePatterns, resolveConfig } =
+    userOptions
   console.log('constructing deptree...')
-  const tree = await deptree(entryPath, moduleIgnorePatterns)
+  const dirPath = searchDir ? resolve(process.cwd(), searchDir) : undefined
+  const moduleResolve = resolveConfig ? makeResolve(resolveConfig) : undefined
+  const tree = await deptree(entryPath, moduleIgnorePatterns, moduleResolve)
   console.log('finished!')
   console.log('finding unused files...')
   const unusedFiles = await findUnused(tree, {
@@ -42,11 +44,13 @@ async function runAnalyze(entry: string, options: Record<string, string>) {
 
 async function runClean(entry: string, options: Record<string, string>) {
   const entryPath = resolve(process.cwd(), entry)
-  const userOptions = getUserOptions(options, entryPath)
-  const { searchDir, moduleIgnorePatterns, fileIgnorePatterns } = userOptions
-  const dirPath = searchDir ? resolve(process.cwd(), searchDir) : undefined
+  const userOptions = await getUserOptions(options, entryPath)
+  const { searchDir, moduleIgnorePatterns, fileIgnorePatterns, resolveConfig } =
+    userOptions
   console.log('constructing deptree...')
-  const tree = await deptree(entryPath, moduleIgnorePatterns)
+  const dirPath = searchDir ? resolve(process.cwd(), searchDir) : undefined
+  const moduleResolve = resolveConfig ? makeResolve(resolveConfig) : undefined
+  const tree = await deptree(entryPath, moduleIgnorePatterns, moduleResolve)
   console.log('finished!')
   console.log('finding unused files...')
   const unusedFiles = await findUnused(tree, {
@@ -59,13 +63,19 @@ async function runClean(entry: string, options: Record<string, string>) {
   console.log('cleaned!')
 }
 
-function readConfig(config: string) {
+async function readConfig(config: string) {
   try {
     if (!existsSync(config)) {
       console.log('reddeps config file cannot be found')
-      return
+      return {}
     }
-    const content = readFileSync(config, 'utf-8')
+    const ext = extname(config)
+    // todo: support simple js
+    if (ext === '.mjs') {
+      const configModule = await import(config)
+      return configModule.default
+    }
+    const content = await readFile(config, 'utf-8')
     return JSON.parse(content)
   } catch (err) {
     console.log('unable to read reddeps config')
@@ -73,13 +83,15 @@ function readConfig(config: string) {
   return {}
 }
 
-function getUserOptions(options: Record<string, string>, entryPath: string) {
+async function getUserOptions(
+  options: Record<string, string>,
+  entryPath: string
+) {
   const { config, ...inputOptions } = options
   const configPath = config
     ? resolve(process.cwd(), config)
     : resolve(dirname(entryPath), './reddeps.config.json')
-
-  const configObj = readConfig(configPath)
+  const configObj = await readConfig(configPath)
 
   return {
     ...inputOptions,

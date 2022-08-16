@@ -1,0 +1,11 @@
+{
+  "moduleIgnorePatterns": ["**/node_modules/**"],
+  "fileIgnorePatterns": ["reddeps.config.json", "reddeps.config.mjs"],
+  "resolveConfig": {
+    "extensions": [".js", ".json", ".jsx", ".tsx", ".ts", ".d.ts"],
+    "modules": [
+      "node_modules",
+      "/Users/chenyingpeng/Documents/my/reddeps/packages/cli/test/fixtures/cli/resolveConfig/common"
+    ]
+  }
+}

@@ -1,6 +1,10 @@
 import { Dirent, readdir as _readdir } from 'fs'
 import { promisify } from 'util'
-import { flow, map, groupBy, mapValues, zipAll } from 'lodash/fp'
+import flow from 'lodash/fp/flow.js'
+import map from 'lodash/fp/map.js'
+import groupBy from 'lodash/fp/groupBy.js'
+import mapValues from 'lodash/fp/mapValues.js'
+import zipAll from 'lodash/fp/zipAll.js'
 import { flatten, Module } from './module'
 import { fileNameFromPath, makeGlobsPredicate } from './utils'
 

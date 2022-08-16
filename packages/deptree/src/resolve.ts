@@ -11,4 +11,8 @@ const resolve: Resolve = promisify(
     extensions: ['.ts', '.tsx', '.js'],
   })
 )
+
+export const makeResolve = (config: Record<string, unknown>) =>
+  promisify(create(config)) as Resolve
+
 export default resolve
