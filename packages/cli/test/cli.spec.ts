@@ -101,6 +101,51 @@ describe('cli', () => {
       expect(stdout).toBe(expectedStdout)
       expect(stderr).toBe('')
     })
+    it('should list all unused files with mjs config file', async () => {
+      const cliFilePath = resolve(__dirname, '../lib/cli.mjs')
+      const input = resolve(__dirname, './fixtures/cli/resolveConfig/input.ts')
+      const dir = resolve(__dirname, './fixtures/cli/resolveConfig')
+      const config = resolve(
+        __dirname,
+        './fixtures/cli/resolveConfig/reddeps.config.mjs'
+      )
+      const args = [
+        cliFilePath,
+        'analyze',
+        input,
+        '--searchDir',
+        dir,
+        '--config',
+        config,
+      ]
+      const { stdout, stderr } = await spawnAsPromise(process.execPath, args)
+      const unusedFile1 = resolve(
+        __dirname,
+        './fixtures/cli/resolveConfig/sub2/innerUnused.ts'
+      )
+      const unusedFile2 = resolve(
+        __dirname,
+        './fixtures/cli/resolveConfig/unused1.ts'
+      )
+      const unusedFile3 = resolve(
+        __dirname,
+        './fixtures/cli/resolveConfig/common/unused.ts'
+      )
+
+      // todo 放到输出文件
+      const expectedStdout =
+        'constructing deptree...\n' +
+        'finished!\n' +
+        'finding unused files...\n' +
+        'Unused files: \n' +
+        '[\n' +
+        `  '${unusedFile3}',\n` +
+        `  '${unusedFile1}',\n` +
+        `  '${unusedFile2}'\n` +
+        ']\n'
+      expect(stdout).toBe(expectedStdout)
+      expect(stderr).toBe('')
+    })
   })
 
   describe('clean', () => {

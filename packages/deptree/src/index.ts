@@ -1,4 +1,5 @@
 export * from './module'
 export * from './file'
 export * from './resolve'
+export { readFile } from './utils'
 export { default as deptree } from './module'

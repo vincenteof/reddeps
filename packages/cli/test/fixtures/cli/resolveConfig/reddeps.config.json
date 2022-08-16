@@ -1,6 +1,6 @@
 {
   "moduleIgnorePatterns": ["**/node_modules/**"],
-  "fileIgnorePatterns": ["reddeps.config.json"],
+  "fileIgnorePatterns": ["reddeps.config.json", "reddeps.config.mjs"],
   "resolveConfig": {
     "extensions": [".js", ".json", ".jsx", ".tsx", ".ts", ".d.ts"],
     "modules": [
