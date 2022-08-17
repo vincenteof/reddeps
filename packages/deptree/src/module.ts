@@ -65,7 +65,6 @@ const PARSABLE_EXT_NAMES = [
   '.js',
   '.mjs',
   '.cjs',
-  '.json',
   '.ts',
   '.jsx',
   '.tsx',
