@@ -162,7 +162,7 @@ describe('module', () => {
         './fixtures/module/moreExtensions/input.ts'
       )
       const module = await createModule(filePath)
-      checkModule(module, filePath, 3)
+      checkModule(module, filePath, 4)
       const cssPath = resolve(
         __dirname,
         './fixtures/module/moreExtensions/sub2.css'
@@ -175,9 +175,14 @@ describe('module', () => {
         __dirname,
         './fixtures/module/moreExtensions/eth.png'
       )
+      const jsonPath = resolve(
+        __dirname,
+        './fixtures/module/moreExtensions/test.json'
+      )
       checkModule(module.dependencies[0], cssPath, 0, false)
       checkModule(module.dependencies[1], tsPath, 0)
       checkModule(module.dependencies[2], pngPath, 0, false)
+      checkModule(module.dependencies[3], jsonPath, 0, false)
     })
   })
   describe('flatten', () => {
