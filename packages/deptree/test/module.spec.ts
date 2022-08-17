@@ -184,6 +184,35 @@ describe('module', () => {
       checkModule(module.dependencies[2], pngPath, 0, false)
       checkModule(module.dependencies[3], jsonPath, 0, false)
     })
+    it('should deal with exports', async () => {
+      const filePath = resolve(__dirname, './fixtures/module/exports/input.ts')
+      const module = await createModule(filePath)
+      checkModule(module, filePath, 1)
+      const sub1Path = resolve(__dirname, './fixtures/module/exports/sub1.ts')
+      const sub2Path = resolve(__dirname, './fixtures/module/exports/sub2.ts')
+      const sub3Path = resolve(__dirname, './fixtures/module/exports/sub3.ts')
+      const moduleSub1 = module.dependencies.find(
+        (x) => x.filePath === sub1Path
+      )
+      if (!moduleSub1) {
+        throw new Error()
+      }
+      checkModule(moduleSub1, sub1Path, 1)
+      const moduleSub2 = moduleSub1.dependencies.find(
+        (x) => x.filePath === sub2Path
+      )
+      if (!moduleSub2) {
+        throw new Error()
+      }
+      checkModule(moduleSub2, sub2Path, 1)
+      const moduleSub3 = moduleSub2.dependencies.find(
+        (x) => x.filePath === sub3Path
+      )
+      if (!moduleSub3) {
+        throw new Error()
+      }
+      checkModule(moduleSub3, sub3Path, 0)
+    })
   })
   describe('flatten', () => {
     it('it should flatten basic dep tree', async () => {
