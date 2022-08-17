@@ -43,6 +43,22 @@ async function findDependencies(
         modules.add(arg?.value)
       }
     },
+    ExportAllDeclaration: ({ node }) => {
+      const source = node.source
+      const sourceType = source?.type
+      const moduleName = source?.value
+      if (sourceType === 'StringLiteral' && moduleName) {
+        modules.add(moduleName)
+      }
+    },
+    ExportNamedDeclaration: ({ node }) => {
+      const source = node.source
+      const sourceType = source?.type
+      const moduleName = source?.value
+      if (sourceType === 'StringLiteral' && moduleName) {
+        modules.add(moduleName)
+      }
+    },
   })
   const resolutions = await Promise.allSettled(
     Array.from(modules).map(async (module) => {
