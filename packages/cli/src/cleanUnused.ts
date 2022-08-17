@@ -8,9 +8,9 @@ const unlink = promisify(_unlink)
 async function remove(fileOrDir: string) {
   const stats = await lstat(fileOrDir)
   if (stats.isDirectory()) {
-    return rm(fileOrDir)
+    return rm(fileOrDir, { recursive: true })
   }
-  unlink(fileOrDir)
+  return unlink(fileOrDir)
 }
 
 export async function cleanUnused(files: string[]) {
