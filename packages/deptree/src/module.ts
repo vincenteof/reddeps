@@ -61,7 +61,7 @@ async function findDependencies(
   return result
 }
 
-const PARSABLE_EXT_NAMES = [
+const PARSABLE_EXTENSIONS = [
   '.js',
   '.mjs',
   '.cjs',
@@ -91,7 +91,7 @@ function createModule(
 
     let ast = null
     // todo: 能否支持 webpack 插件
-    const ableToParse = PARSABLE_EXT_NAMES.includes(ext)
+    const ableToParse = PARSABLE_EXTENSIONS.includes(ext)
     if (ableToParse) {
       // todo: 抽象一下这里的配置，做成可变
       ast = await babelParse(content, {
