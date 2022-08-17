@@ -2,10 +2,19 @@ import { resolve } from 'path'
 import { describe, expect, it } from 'vitest'
 import createModule, { Module, flatten } from '../src/module'
 
-const checkModule = (moduleObj: Module, filePath: string, depLen: number) => {
+const checkModule = (
+  moduleObj: Module,
+  filePath: string,
+  depLen: number,
+  jsModule = true
+) => {
   expect(moduleObj).not.toBeNull()
   expect(moduleObj.content).not.toBeNull()
-  expect(moduleObj.ast).not.toBeNull()
+  if (jsModule) {
+    expect(moduleObj.ast).not.toBeNull()
+  } else {
+    expect(moduleObj.ast).toBeNull()
+  }
   expect(moduleObj.dependencies.length).toBe(depLen)
   expect(moduleObj.filePath).toBe(filePath)
 }
@@ -146,6 +155,29 @@ describe('module', () => {
       checkModule(circleDep11, dep211Path, 1)
       const last = circleDep11.dependencies[0]
       expect(circleRoot).toBe(last)
+    })
+    it('should find non-js deps', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/moreExtensions/input.ts'
+      )
+      const module = await createModule(filePath)
+      checkModule(module, filePath, 3)
+      const cssPath = resolve(
+        __dirname,
+        './fixtures/module/moreExtensions/sub2.css'
+      )
+      const tsPath = resolve(
+        __dirname,
+        './fixtures/module/moreExtensions/sub1.ts'
+      )
+      const pngPath = resolve(
+        __dirname,
+        './fixtures/module/moreExtensions/eth.png'
+      )
+      checkModule(module.dependencies[0], cssPath, 0, false)
+      checkModule(module.dependencies[1], tsPath, 0)
+      checkModule(module.dependencies[2], pngPath, 0, false)
     })
   })
   describe('flatten', () => {
