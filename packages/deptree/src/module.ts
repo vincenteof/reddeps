@@ -1,4 +1,4 @@
-import { dirname } from 'path'
+import { dirname, extname } from 'path'
 import { parse as _parse, traverse } from '@babel/core'
 import _resolve, { Resolve } from './resolve'
 import {
@@ -11,7 +11,7 @@ import {
 export interface Module {
   filePath: string
   content: string
-  ast: ReturnType<typeof _parse>
+  ast: ReturnType<typeof _parse> | null
   dependencies: Module[]
 }
 
@@ -61,6 +61,17 @@ async function findDependencies(
   return result
 }
 
+const PARSABLE_EXT_NAMES = [
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.ts',
+  '.jsx',
+  '.tsx',
+  '.d.ts',
+]
+
 function createModule(
   filePath: string,
   ignorePatterns: string[] = [],
@@ -77,15 +88,22 @@ function createModule(
     }
     const content = await readFile(curFilePath, 'utf-8')
     const filename = fileNameFromPath(curFilePath)
-    // todo: 抽象一下这里的配置，做成可变
-    const ast = await babelParse(content, {
-      filename,
-      babelrc: false,
-      configFile: false,
-      parserOpts: {
-        plugins: ['typescript', 'jsx', 'decorators-legacy'],
-      },
-    })
+    const ext = extname(curFilePath)
+
+    let ast = null
+    // todo: 能否支持 webpack 插件
+    const ableToParse = PARSABLE_EXT_NAMES.includes(ext)
+    if (ableToParse) {
+      // todo: 抽象一下这里的配置，做成可变
+      ast = await babelParse(content, {
+        filename,
+        babelrc: false,
+        configFile: false,
+        parserOpts: {
+          plugins: ['typescript', 'jsx', 'decorators-legacy'],
+        },
+      })
+    }
 
     const curModule: Module = {
       filePath: curFilePath,
@@ -96,7 +114,9 @@ function createModule(
 
     generated.set(curFilePath, curModule)
 
-    const depFilePaths = await findDependencies(curFilePath, ast, resolve)
+    const depFilePaths = ableToParse
+      ? await findDependencies(curFilePath, ast, resolve)
+      : []
     const filteredPaths = ignorePatterns.length
       ? depFilePaths.filter((p) => !predicate(p))
       : depFilePaths
