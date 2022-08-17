@@ -134,20 +134,18 @@ function createModule(
 export function flatten(module: Module) {
   const ret: Module[] = []
   const queue: Module[] = [module]
-  const visited = new Set<string>()
+  const visited = new Set<string>([module.filePath])
   let cur: Module | undefined = undefined
   while (queue.length) {
     cur = queue.shift()
     if (cur) {
       ret.push(cur)
-      if (cur.dependencies) {
-        for (const dep of cur.dependencies) {
-          if (!visited.has(dep.filePath)) {
-            queue.push(dep)
-            visited.add(dep.filePath)
-          }
+      cur.dependencies?.forEach((dep) => {
+        if (!visited.has(dep.filePath)) {
+          queue.push(dep)
+          visited.add(dep.filePath)
         }
-      }
+      })
     }
   }
   return ret

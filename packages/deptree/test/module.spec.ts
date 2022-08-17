@@ -192,6 +192,16 @@ describe('module', () => {
       const flattened = flatten(module)
       expect(flattened.length).toBe(3)
     })
+    it('it should flatten circular dep tree with entry duplicated', async () => {
+      const filePath = resolve(
+        __dirname,
+        './fixtures/module/circularDeps/circularInput.ts'
+      )
+      const module = await createModule(filePath)
+      const flattened = flatten(module)
+      expect(flattened.length).toBe(1)
+      expect(flattened.map((x) => x.filePath)).toStrictEqual([filePath])
+    })
     it('it should flatten circular dep tree', async () => {
       const filePath = resolve(
         __dirname,
